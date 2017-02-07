@@ -8,6 +8,11 @@ function [C, sigma] = dataset3Params(X, y, Xval, yval)
 %
 
 % You need to return the following variables correctly.
+Cval = [0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30](:);
+Sval = [0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30](:);
+[A,B] = meshgrid(Cval, Sval);
+c=cat(2, A', B');
+CombVal = reshape(c, [], 2);
 C = 1;
 sigma = 0.3;
 
@@ -24,10 +29,16 @@ sigma = 0.3;
 %
 
 
+errors = zeros(size(CombVal, 1), 1);
+for i = 1:size(CombVal, 1)
+  model= svmTrain(X, y, CombVal(i,1), @(x1, x2) gaussianKernel(x1, x2, CombVal(i,2)));
+  predictions = svmPredict(model, Xval);
+  errors(i) = mean(double(predictions ~= yval));
+end
 
-
-
-
+[min_error, pos] = min(errors);
+C = CombVal(pos, 1);
+sigma = CombVal(pos, 2);
 
 % =========================================================================
 
